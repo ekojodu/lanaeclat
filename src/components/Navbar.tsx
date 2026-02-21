@@ -60,21 +60,24 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
-      <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
-        {navLinks.map(({ path, label }) => (
-          <Link
-            key={path}
-            to={path}
-            className={location.pathname === path ? 'active' : ''}
-          >
-            {label}
+      {/* Mobile menu - only render contents when open */}
+      {menuOpen && (
+        <div className="mobile-menu open">
+          {navLinks.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={location.pathname === path ? 'active' : ''}
+              onClick={() => setMenuOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+          <Link to="/contact" className="btn-primary mobile-cta" onClick={() => setMenuOpen(false)}>
+            <span>Book Appointment</span>
           </Link>
-        ))}
-        <Link to="/contact" className="btn-primary mobile-cta">
-          <span>Book Appointment</span>
-        </Link>
-      </div>
+        </div>
+      )}
     </nav>
   );
 }

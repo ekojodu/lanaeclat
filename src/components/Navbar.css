@@ -4,13 +4,15 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 20px 0;
+  height: var(--navbar-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   transition: all 0.4s ease;
 }
 
 .navbar.scrolled {
-  padding: 12px 0;
-  background: rgba(253, 240, 243, 0.95);
+  background: rgba(253, 240, 243, 0.97);
   --webkit-backdrop-filter: blur(20px);
   box-shadow: 0 2px 24px rgba(155, 47, 82, 0.1);
 }
@@ -19,6 +21,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 40px;
@@ -117,19 +120,25 @@
 .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-/* Mobile menu - hidden by default at ALL screen sizes */
+/* Mobile menu — only shown when menuOpen is true (rendered via React conditional) */
 .mobile-menu {
-  display: none;
+  position: absolute;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  background: rgba(253, 240, 243, 0.99);
+  --webkit-backdrop-filter: blur(20px);
+  display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 0 24px 24px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease;
+  padding: 8px 24px 24px;
+  box-shadow: 0 8px 24px rgba(155, 47, 82, 0.12);
+  animation: fadeDown 0.3s ease forwards;
+  z-index: 999;
 }
 
-.mobile-menu.open {
-  max-height: 500px;
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .mobile-menu a {
@@ -138,10 +147,12 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--charcoal);
-  padding: 12px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--rose-blush);
   transition: color 0.3s;
 }
+
+.mobile-menu a:last-of-type { border-bottom: none; }
 
 .mobile-menu a:hover,
 .mobile-menu a.active { color: var(--rose-deep); }
@@ -156,17 +167,10 @@
   .nav-links, .nav-cta { display: none; }
   .hamburger { display: flex; }
 
-  /* Show mobile menu container but still collapsed until .open is added */
-  .mobile-menu { display: flex; }
-
-  /* Always solid background on mobile so page content never bleeds through */
+  /* Always solid background on mobile */
   .navbar {
     background: rgba(253, 240, 243, 0.97);
     --webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 2px 24px rgba(155, 47, 82, 0.08);
-  }
-
-  .navbar.scrolled {
-    background: rgba(253, 240, 243, 0.99);
+    box-shadow: 0 2px 16px rgba(155, 47, 82, 0.08);
   }
 }
