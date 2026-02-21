@@ -17,10 +17,17 @@ export function useAuth() {
 	const [isAdmin, setIsAdmin] = useState(false);
 
 	useEffect(() => {
-		// Listen to auth state — this fires immediately with the current session
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange(async (_event, session) => {
+		} = supabase.auth.onAuthStateChange(async (event, session) => {
+			// Session expired or signed out — log out cleanly, never get stuck
+			if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+				setUser(null);
+				setIsAdmin(false);
+				setLoading(false);
+				return;
+			}
+
 			const u = session?.user ?? null;
 
 			if (!u) {
@@ -30,7 +37,6 @@ export function useAuth() {
 				return;
 			}
 
-			// Check whitelist
 			const allowed = await checkWhitelist(u.email ?? '');
 
 			if (!allowed) {
@@ -45,7 +51,16 @@ export function useAuth() {
 			setLoading(false);
 		});
 
-		return () => subscription.unsubscribe();
+		// Safety net — if onAuthStateChange never fires (e.g. network issue),
+		// stop loading after 5 seconds and show login page
+		const timeout = setTimeout(() => {
+			setLoading(false);
+		}, 5000);
+
+		return () => {
+			subscription.unsubscribe();
+			clearTimeout(timeout);
+		};
 	}, []);
 
 	const signOut = async () => {
