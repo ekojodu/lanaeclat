@@ -7,42 +7,67 @@ export function useAuth() {
 	const [loading, setLoading] = useState(true);
 	const [isAdmin, setIsAdmin] = useState(false);
 
-	const checkAdminStatus = async (u: User | null) => {
-		if (!u) {
-			setIsAdmin(false);
-			return;
-		}
+	const checkAdminStatus = async (u: User | null): Promise<boolean> => {
+		if (!u) return false;
 
-		const { data, error } = await supabase
-			.from('admin_whitelist')
-			.select('email')
-			.eq('email', u.email)
-			.single();
+		try {
+			const { data, error } = await supabase
+				.from('admin_whitelist')
+				.select('email')
+				.eq('email', u.email)
+				.maybeSingle(); // won't error if no row found
 
-		if (error || !data) {
-			// Not on the whitelist — sign them out immediately
-			await supabase.auth.signOut();
-			setUser(null);
-			setIsAdmin(false);
-		} else {
-			setIsAdmin(true);
+			if (error) {
+				console.error('Whitelist check error:', error.message);
+				return false;
+			}
+
+			return !!data;
+		} catch (err) {
+			console.error('Whitelist check failed:', err);
+			return false;
 		}
 	};
 
 	useEffect(() => {
-		supabase.auth.getSession().then(async ({ data: { session } }) => {
-			const u = session?.user ?? null;
-			setUser(u);
-			await checkAdminStatus(u);
-			setLoading(false);
-		});
+		const init = async () => {
+			try {
+				const {
+					data: { session },
+				} = await supabase.auth.getSession();
+				const u = session?.user ?? null;
+				setUser(u);
+
+				const admin = await checkAdminStatus(u);
+				setIsAdmin(admin);
+
+				if (u && !admin) {
+					await supabase.auth.signOut();
+					setUser(null);
+				}
+			} catch (err) {
+				console.error('Auth init error:', err);
+			} finally {
+				setLoading(false); // always runs no matter what
+			}
+		};
+
+		init();
 
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(async (_event, session) => {
 			const u = session?.user ?? null;
 			setUser(u);
-			await checkAdminStatus(u);
+
+			const admin = await checkAdminStatus(u);
+			setIsAdmin(admin);
+
+			if (u && !admin) {
+				await supabase.auth.signOut();
+				setUser(null);
+				setIsAdmin(false);
+			}
 		});
 
 		return () => subscription.unsubscribe();
