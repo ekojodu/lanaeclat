@@ -1,12 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { treatments } from '../data/treatments';
+import { supabase } from '../lib/supabase';
+import type { Service } from '../lib/supabase';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import './Services.css';
 
 export default function Services() {
 	const [active, setActive] = useState<string | null>(null);
+	const [dbServices, setDbServices] = useState<Service[]>([]);
 	const revealRef = useScrollReveal();
+
+	useEffect(() => {
+		supabase
+			.from('services')
+			.select('*')
+			.eq('active', true)
+			.then(({ data }) => {
+				if (data) setDbServices(data);
+			});
+	}, []);
+
+	// Merge static treatment data with live Supabase prices/highlights
+	const mergedTreatments = treatments.map((t) => {
+		const live = dbServices.find((s) => s.id === t.id);
+		return {
+			...t,
+			price: live?.price ?? null,
+			highlight: live?.highlight ?? t.highlight ?? null,
+		};
+	});
 
 	return (
 		<main className='services-page' ref={revealRef as any}>
@@ -59,7 +82,7 @@ export default function Services() {
 					</div>
 
 					<div className='services-list'>
-						{treatments.map((t, i) => (
+						{mergedTreatments.map((t, i) => (
 							<div
 								key={t.id}
 								className={`service-item ${active === t.id ? 'expanded' : ''}`}
@@ -105,6 +128,11 @@ export default function Services() {
 										<span className='service-duration-note'>
 											Session: {t.duration}
 										</span>
+										{t.price != null && t.price > 0 && (
+											<span className='service-price'>
+												₦{t.price.toLocaleString()}
+											</span>
+										)}
 									</div>
 								</div>
 							</div>

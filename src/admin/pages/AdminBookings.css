@@ -1,0 +1,85 @@
+.bookings-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.booking-stat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(42, 26, 31, 0.06);
+  border: 1px solid #f0e8ec;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.booking-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.booking-stat-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warm-grey);
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1.5px solid #f0e8ec;
+  background: white;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--warm-grey);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-tab:hover {
+  border-color: var(--rose-blush);
+  color: var(--rose-deep);
+}
+
+.filter-tab.active {
+  background: var(--rose-deep);
+  border-color: var(--rose-deep);
+  color: white;
+}
+
+.filter-count {
+  background: rgba(255,255,255,0.25);
+  border-radius: 50px;
+  padding: 1px 7px;
+  font-size: 0.7rem;
+}
+
+.filter-tab:not(.active) .filter-count {
+  background: var(--rose-pearl);
+  color: var(--rose-mid);
+}
+
+@media (max-width: 700px) {
+  .bookings-stats { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 500px) {
+  .bookings-stats { grid-template-columns: repeat(2, 1fr); }
+}

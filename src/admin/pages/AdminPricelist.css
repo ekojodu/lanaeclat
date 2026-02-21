@@ -1,0 +1,139 @@
+.price-row {
+  padding: 20px 0;
+  border-bottom: 1px solid #f0e8ec;
+  transition: background 0.2s;
+}
+
+.price-row:last-child { border-bottom: none; }
+.price-row:hover { background: #fdf8fa; margin: 0 -24px; padding: 20px 24px; }
+.price-row.editing { background: var(--rose-pearl); margin: 0 -24px; padding: 20px 24px; }
+
+.price-row-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.price-service-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.price-emoji { font-size: 1.8rem; flex-shrink: 0; }
+
+.price-service-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+
+.price-service-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--warm-grey);
+  flex-wrap: wrap;
+}
+
+.price-badge {
+  background: linear-gradient(135deg, var(--rose-deep), var(--rose-mid));
+  color: white;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.price-active.yes { color: #276749; }
+.price-active.no  { color: #cc3333; }
+
+.price-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.price-display {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--rose-deep);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Edit form */
+.price-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.price-input-group {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--rose-blush);
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+
+.price-currency {
+  padding: 8px 10px;
+  background: var(--rose-pearl);
+  color: var(--rose-deep);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-right: 1px solid var(--rose-blush);
+}
+
+.price-input {
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  width: 100px;
+  color: var(--charcoal);
+}
+
+.price-badge-input {
+  padding: 8px 12px;
+  border: 1.5px solid var(--rose-blush);
+  border-radius: 10px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  outline: none;
+  width: 160px;
+  color: var(--charcoal);
+}
+
+.price-badge-input:focus { border-color: var(--rose-mid); }
+
+.price-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--charcoal);
+  cursor: pointer;
+}
+
+.price-toggle input { cursor: pointer; accent-color: var(--rose-mid); }
+
+@media (max-width: 700px) {
+  .price-row-main { flex-direction: column; align-items: flex-start; }
+  .price-right { width: 100%; justify-content: flex-start; }
+  .price-edit-form { flex-direction: column; align-items: flex-start; }
+  .price-badge-input { width: 100%; }
+}

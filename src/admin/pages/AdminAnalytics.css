@@ -1,0 +1,118 @@
+.analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(42, 26, 31, 0.06);
+  border: 1px solid #f0e8ec;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.kpi-icon { font-size: 1.8rem; }
+
+.kpi-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.kpi-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warm-grey);
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* Bar chart */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 180px;
+  padding-top: 16px;
+}
+
+.bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  background: var(--rose-pearl);
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  background: linear-gradient(to top, var(--rose-deep), var(--rose-mid));
+  border-radius: 6px;
+  transition: height 0.8s ease;
+  min-height: 4px;
+}
+
+.bar-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--rose-deep);
+}
+
+.bar-label {
+  font-size: 0.65rem;
+  color: var(--warm-grey);
+  letter-spacing: 0.05em;
+}
+
+/* Progress bars */
+.progress-track {
+  height: 8px;
+  background: var(--rose-pearl);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 50px;
+  transition: width 0.8s ease;
+}
+
+.status-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .analytics-kpis { grid-template-columns: repeat(2, 1fr); }
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 500px) {
+  .analytics-kpis { grid-template-columns: repeat(2, 1fr); }
+}

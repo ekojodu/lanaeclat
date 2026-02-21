@@ -260,3 +260,11 @@
 		max-height: 500px;
 	}
 }
+
+.service-price {
+	font-family: 'Cormorant Garamond', serif;
+	font-size: 1.3rem;
+	font-weight: 600;
+	color: var(--rose-deep);
+	margin-left: auto;
+}

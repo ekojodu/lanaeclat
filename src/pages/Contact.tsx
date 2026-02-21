@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
-import { ENV } from '../config/env';
+import { ENV } from '../config/env'
+import { supabase } from '../lib/supabase';
 import { treatments } from '../data/treatments';
 import './Contact.css';
 
@@ -26,27 +27,40 @@ export default function Contact() {
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Build mailto body
-    const body = `
-Hello Lana Éclat Beauty Studio,
+    // Save booking to Supabase (shows in admin dashboard)
+    await supabase.from('bookings').insert({
+      client_name:    form.name,
+      client_email:   form.email,
+      client_phone:   form.phone,
+      service_id:     form.service,
+      service_name:   form.service,
+      preferred_date: form.date,
+      preferred_time: form.time,
+      notes:          form.message,
+      status:         'pending',
+    });
 
-I would like to book an appointment:
-
-Name: ${form.name}
-Email: ${form.email}
-Phone: ${form.phone}
-Service: ${form.service}
-Preferred Date: ${form.date}
-Preferred Time: ${form.time}
-
-Additional Notes:
-${form.message}
-
-Looking forward to hearing from you!
-    `.trim();
+    // Also open mailto as a notification backup
+    const body = [
+      'Hello Lana Éclat Beauty Studio,',
+      '',
+      'I would like to book an appointment:',
+      '',
+      `Name: ${form.name}`,
+      `Email: ${form.email}`,
+      `Phone: ${form.phone}`,
+      `Service: ${form.service}`,
+      `Preferred Date: ${form.date}`,
+      `Preferred Time: ${form.time}`,
+      '',
+      'Additional Notes:',
+      form.message,
+      '',
+      'Looking forward to hearing from you!',
+    ].join('\n');
 
     const subject = encodeURIComponent(`${ENV.reservationSubject} — ${form.name}`);
     const encodedBody = encodeURIComponent(body);
@@ -56,10 +70,9 @@ Looking forward to hearing from you!
     setSubmitted(true);
   };
 
-  // OpenStreetMap — free, no API key needed
-  // bbox = lng_min, lat_min, lng_max, lat_max (0.05 degree spread around pin)
-  const osmEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${ENV.mapLng - 0.05}%2C${ENV.mapLat - 0.05}%2C${ENV.mapLng + 0.05}%2C${ENV.mapLat + 0.05}&layer=mapnik&marker=${ENV.mapLat}%2C${ENV.mapLng}`;
-  const directionsUrl = `https://www.openstreetmap.org/directions?to=${ENV.mapLat},${ENV.mapLng}`;
+  // Google Maps embed — no API key required for this embed format
+  const googleMapsEmbed = `https://maps.google.com/maps?q=${encodeURIComponent(ENV.location)}&t=&z=${ENV.mapZoom}&ie=UTF8&iwloc=&output=embed`;
+  const directionsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(ENV.location)}`;
 
   const whatsappNum = ENV.whatsapp.replace(/\D/g, '');
 
@@ -257,15 +270,43 @@ Looking forward to hearing from you!
             <h2>We're in <em>Kabba, Kogi State</em></h2>
           </div>
           <div className="map-wrapper reveal reveal-delay-1">
-            <iframe
-              title="Lana Eclat Beauty Studio Location"
-              src={osmEmbed}
-              width="100%"
-              height="450"
-              style={{ border: 0, borderRadius: '20px' }}
-              allowFullScreen
-              loading="lazy"
-            />
+            <div className="map-static-card">
+              {/* Static map using OpenStreetMap tile — works on all devices */}
+              <img
+                src={`https://staticmap.openstreetmap.de/staticmap.php?center=${ENV.mapLat},${ENV.mapLng}&zoom=${ENV.mapZoom}&size=1200x450&markers=${ENV.mapLat},${ENV.mapLng},red`}
+                alt="Map showing Lana Eclat Beauty Studio location in Kabba, Kogi State"
+                className="map-static-img"
+                onError={(e) => {
+                  // Fallback if static map fails — show a styled placeholder
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              {/* Fallback card if image fails */}
+              <div className="map-fallback" style={{ display: 'none' }}>
+                <div className="map-fallback-pin">📍</div>
+                <h3>Lana Éclat Beauty Studio</h3>
+                <p>{ENV.location}</p>
+              </div>
+              {/* Overlay with location info + directions button */}
+              <div className="map-overlay-card">
+                <div className="map-overlay-info">
+                  <span className="map-overlay-label">📍 Our Location</span>
+                  <strong>{ENV.location}</strong>
+                  <span className="map-overlay-hours">Mon–Sat: 9am–7pm</span>
+                </div>
+                <a
+                  href={directionsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-primary map-directions-btn"
+                >
+                  <span>Get Directions →</span>
+                </a>
+              </div>
+            </div>
           </div>
           <div className="map-address reveal reveal-delay-2">
             <span>📍 {ENV.location}</span>
@@ -275,7 +316,7 @@ Looking forward to hearing from you!
               rel="noreferrer"
               className="btn-outline"
             >
-              Get Directions →
+              Open in Google Maps →
             </a>
           </div>
         </div>
