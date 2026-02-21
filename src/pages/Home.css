@@ -44,14 +44,14 @@
 
 @media (max-width: 900px) {
 	.hero-content {
-		padding-top: calc(var(--navbar-height) + 40px);
+		padding-top: calc(var(--navbar-height) + 180px);
 		padding-bottom: 60px;
 	}
 }
 
 @media (max-width: 600px) {
 	.hero-content {
-		padding-top: calc(var(--navbar-height) + 32px);
+		padding-top: calc(var(--navbar-height) + 172px);
 		padding-bottom: 48px;
 	}
 }
