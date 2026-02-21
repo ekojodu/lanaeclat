@@ -153,3 +153,4 @@ const galleryItems = [
 ---
 
 Built with ♥ for Lana Éclat Beauty Studio, Kabba, Kogi State.
+# lanaeclat
