@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import type { User } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
+import type { User } from '@supabase/supabase-js'
 
 export function useAuth() {
 	const [user, setUser] = useState<User | null>(null);
@@ -73,11 +73,11 @@ export function useAuth() {
 		return () => subscription.unsubscribe();
 	}, []);
 
-	const signOut = async () => {
-		await supabase.auth.signOut();
-		setUser(null);
-		setIsAdmin(false);
-	};
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setIsAdmin(false)
+  }
 
-	return { user, loading, isAdmin, signOut };
+  return { user, loading, isAdmin, signOut }
 }
