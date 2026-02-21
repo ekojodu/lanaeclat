@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -11,56 +11,74 @@ const checkWhitelist = async (email: string): Promise<boolean> => {
   return !!data
 }
 
+const resolveUser = async (
+  setUser: (u: User | null) => void,
+  setIsAdmin: (a: boolean) => void,
+  setLoading: (l: boolean) => void
+) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session?.user) {
+      setUser(null)
+      setIsAdmin(false)
+      return
+    }
+
+    const allowed = await checkWhitelist(session.user.email ?? '')
+
+    if (!allowed) {
+      await supabase.auth.signOut()
+      setUser(null)
+      setIsAdmin(false)
+    } else {
+      setUser(session.user)
+      setIsAdmin(true)
+    }
+  } catch (err) {
+    console.error('Auth error:', err)
+    setUser(null)
+    setIsAdmin(false)
+  } finally {
+    setLoading(false)
+  }
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
-  const checking = useRef(false) // prevent duplicate checks
 
   useEffect(() => {
+    // Run immediately on mount (handles refresh)
+    resolveUser(setUser, setIsAdmin, setLoading)
+
+    // Also listen for login/logout events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // Ignore events that shouldn't trigger a full re-check
-        if (event === 'TOKEN_REFRESHED') return
-        if (event === 'USER_UPDATED') return
-
-        if (event === 'SIGNED_OUT' || !session?.user) {
+        if (event === 'SIGNED_OUT') {
           setUser(null)
           setIsAdmin(false)
           setLoading(false)
           return
         }
 
-        // Prevent duplicate simultaneous whitelist checks
-        if (checking.current) return
-        checking.current = true
-
-        try {
-          const u = session.user
-          const allowed = await checkWhitelist(u.email ?? '')
-
+        if (event === 'SIGNED_IN' && session?.user) {
+          const allowed = await checkWhitelist(session.user.email ?? '')
           if (!allowed) {
             await supabase.auth.signOut()
             setUser(null)
             setIsAdmin(false)
           } else {
-            setUser(u)
+            setUser(session.user)
             setIsAdmin(true)
           }
-        } finally {
-          checking.current = false
           setLoading(false)
         }
       }
     )
 
-    // Safety net — stop loading after 6s if nothing fires
-    const timeout = setTimeout(() => setLoading(false), 6000)
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
-    }
+    return () => subscription.unsubscribe()
   }, [])
 
   const signOut = async () => {
