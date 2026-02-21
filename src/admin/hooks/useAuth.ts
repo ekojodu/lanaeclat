@@ -2,77 +2,56 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
-const checkWhitelist = async (email: string): Promise<boolean> => {
-  const { data } = await supabase
-    .from('admin_whitelist')
-    .select('email')
-    .eq('email', email)
-    .maybeSingle()
-  return !!data
-}
-
-const resolveUser = async (
-  setUser: (u: User | null) => void,
-  setIsAdmin: (a: boolean) => void,
-  setLoading: (l: boolean) => void
-) => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
-
-    if (!session?.user) {
-      setUser(null)
-      setIsAdmin(false)
-      return
-    }
-
-    const allowed = await checkWhitelist(session.user.email ?? '')
-
-    if (!allowed) {
-      await supabase.auth.signOut()
-      setUser(null)
-      setIsAdmin(false)
-    } else {
-      setUser(session.user)
-      setIsAdmin(true)
-    }
-  } catch (err) {
-    console.error('Auth error:', err)
-    setUser(null)
-    setIsAdmin(false)
-  } finally {
-    setLoading(false)
-  }
-}
-
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    // Run immediately on mount (handles refresh)
-    resolveUser(setUser, setIsAdmin, setLoading)
+    const run = async () => {
+      console.log('1. getting session...')
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      console.log('2. session result:', session?.user?.email ?? 'none', sessionError?.message ?? 'no error')
 
-    // Also listen for login/logout events
+      if (!session?.user) {
+        console.log('3. no session, showing login')
+        setUser(null)
+        setIsAdmin(false)
+        setLoading(false)
+        return
+      }
+
+      console.log('4. checking whitelist for:', session.user.email)
+      const { data, error: wlError } = await supabase
+        .from('admin_whitelist')
+        .select('email')
+        .eq('email', session.user.email)
+        .maybeSingle()
+      console.log('5. whitelist result:', data, wlError?.message ?? 'no error')
+
+      if (!data) {
+        console.log('6. not on whitelist, signing out')
+        await supabase.auth.signOut()
+        setUser(null)
+        setIsAdmin(false)
+      } else {
+        console.log('6. is admin, showing dashboard')
+        setUser(session.user)
+        setIsAdmin(true)
+      }
+
+      setLoading(false)
+      console.log('7. loading done')
+    }
+
+    run()
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('auth event:', event)
         if (event === 'SIGNED_OUT') {
           setUser(null)
           setIsAdmin(false)
-          setLoading(false)
-          return
-        }
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          const allowed = await checkWhitelist(session.user.email ?? '')
-          if (!allowed) {
-            await supabase.auth.signOut()
-            setUser(null)
-            setIsAdmin(false)
-          } else {
-            setUser(session.user)
-            setIsAdmin(true)
-          }
           setLoading(false)
         }
       }
