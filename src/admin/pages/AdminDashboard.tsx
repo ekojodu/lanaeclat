@@ -8,10 +8,22 @@ import './AdminDashboard.css'
 
 type Tab = 'bookings' | 'clients' | 'analytics' | 'pricelist'
 
+const VALID_TABS: Tab[] = ['bookings', 'clients', 'analytics', 'pricelist']
+
+const getInitialTab = (): Tab => {
+  const hash = window.location.hash.replace('#', '') as Tab
+  return VALID_TABS.includes(hash) ? hash : 'bookings'
+}
+
 export default function AdminDashboard() {
   const { user, signOut } = useAuth()
-  const [tab, setTab] = useState<Tab>('bookings')
+  const [tab, setTab] = useState<Tab>(getInitialTab)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const changeTab = (t: Tab) => {
+    setTab(t)
+    window.location.hash = t
+  }
 
   const navItems: { key: Tab; label: string; icon: string }[] = [
     { key: 'bookings',  label: 'Bookings',   icon: '📋' },
@@ -34,7 +46,7 @@ export default function AdminDashboard() {
             <button
               key={item.key}
               className={`sidebar-link ${tab === item.key ? 'active' : ''}`}
-              onClick={() => { setTab(item.key); setSidebarOpen(false) }}
+              onClick={() => { changeTab(item.key); setSidebarOpen(false) }}
             >
               <span className="sidebar-icon">{item.icon}</span>
               <span>{item.label}</span>
