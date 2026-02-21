@@ -3,14 +3,25 @@ import { supabase } from '../../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
 const checkWhitelist = async (email: string): Promise<boolean> => {
-  const { data, error } = await supabase
-    .from('admin_whitelist')
-    .select('email')
-    .eq('email', email.toLowerCase().trim())
-    .maybeSingle()
+  try {
+    const { data, error } = await supabase.functions.invoke('check-admin', {
+      body: { email }
+    })
+    if (error) return false
+    return data?.isAdmin === true
+  } catch {
+    return false
+  }
+}
 
-  if (error) return false
-  return !!data
+const resolveUser = async (u: User | null): Promise<{ user: User | null; isAdmin: boolean }> => {
+  if (!u) return { user: null, isAdmin: false }
+  const allowed = await checkWhitelist(u.email ?? '')
+  if (!allowed) {
+    await supabase.auth.signOut()
+    return { user: null, isAdmin: false }
+  }
+  return { user: u, isAdmin: true }
 }
 
 export function useAuth() {
@@ -19,45 +30,44 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    const safetyTimeout = setTimeout(() => setLoading(false), 8000)
+    let mounted = true
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        const u = session?.user ?? null
+    const init = async () => {
+      // Step 1: explicitly read the stored session first
+      const { data: { session } } = await supabase.auth.getSession()
+      const { user: u, isAdmin: admin } = await resolveUser(session?.user ?? null)
 
-        if (!u) {
-          setUser(null)
-          setIsAdmin(false)
-          setLoading(false)
-          clearTimeout(safetyTimeout)
-          return
-        }
-
-        // Only run whitelist check on meaningful events
-        if (!['INITIAL_SESSION', 'SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
-          return
-        }
-
-        const allowed = await checkWhitelist(u.email ?? '')
-
-        if (!allowed) {
-          await supabase.auth.signOut()
-          setUser(null)
-          setIsAdmin(false)
-        } else {
-          setUser(u)
-          setIsAdmin(true)
-        }
-
+      if (mounted) {
+        setUser(u)
+        setIsAdmin(admin)
         setLoading(false)
-        clearTimeout(safetyTimeout)
       }
-    )
 
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(safetyTimeout)
+      // Step 2: listen for future auth changes (login, logout, token refresh)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, newSession) => {
+          if (!mounted) return
+          if (event === 'SIGNED_OUT') {
+            setUser(null)
+            setIsAdmin(false)
+            return
+          }
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            const { user: u2, isAdmin: admin2 } = await resolveUser(newSession?.user ?? null)
+            if (mounted) {
+              setUser(u2)
+              setIsAdmin(admin2)
+            }
+          }
+        }
+      )
+
+      return () => subscription.unsubscribe()
     }
+
+    init()
+
+    return () => { mounted = false }
   }, [])
 
   const signOut = async () => {
