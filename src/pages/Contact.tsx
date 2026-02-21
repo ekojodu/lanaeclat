@@ -56,9 +56,10 @@ Looking forward to hearing from you!
     setSubmitted(true);
   };
 
-  const mapEmbedUrl = ENV.googleMapsApiKey
-    ? `https://www.google.com/maps/embed/v1/place?key=${ENV.googleMapsApiKey}&q=${ENV.mapLat},${ENV.mapLng}&zoom=${ENV.mapZoom}`
-    : `https://maps.google.com/maps?q=${ENV.mapLat},${ENV.mapLng}&z=${ENV.mapZoom}&output=embed`;
+  // OpenStreetMap — free, no API key needed
+  // bbox = lng_min, lat_min, lng_max, lat_max (0.05 degree spread around pin)
+  const osmEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${ENV.mapLng - 0.05}%2C${ENV.mapLat - 0.05}%2C${ENV.mapLng + 0.05}%2C${ENV.mapLat + 0.05}&layer=mapnik&marker=${ENV.mapLat}%2C${ENV.mapLng}`;
+  const directionsUrl = `https://www.openstreetmap.org/directions?to=${ENV.mapLat},${ENV.mapLng}`;
 
   const whatsappNum = ENV.whatsapp.replace(/\D/g, '');
 
@@ -258,24 +259,18 @@ Looking forward to hearing from you!
           <div className="map-wrapper reveal reveal-delay-1">
             <iframe
               title="Lana Eclat Beauty Studio Location"
-              src={mapEmbedUrl}
+              src={osmEmbed}
               width="100%"
               height="450"
               style={{ border: 0, borderRadius: '20px' }}
               allowFullScreen
               loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
             />
-            {!ENV.googleMapsApiKey && (
-              <div className="map-overlay-note">
-                <p>📍 Add your <code>REACT_APP_GOOGLE_MAPS_API_KEY</code> in <code>.env</code> for an interactive map</p>
-              </div>
-            )}
           </div>
           <div className="map-address reveal reveal-delay-2">
             <span>📍 {ENV.location}</span>
             <a
-              href={`https://maps.google.com/?q=${ENV.mapLat},${ENV.mapLng}`}
+              href={directionsUrl}
               target="_blank"
               rel="noreferrer"
               className="btn-outline"
