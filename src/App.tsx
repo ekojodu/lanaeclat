@@ -27,7 +27,7 @@ function ScrollToTop() {
 }
 
 function AdminRoute() {
-	const { user, loading } = useAuth();
+	const { user, loading, isAdmin } = useAuth();
 	if (loading)
 		return (
 			<div
@@ -43,7 +43,27 @@ function AdminRoute() {
 				Loading...
 			</div>
 		);
-	return user ? <AdminDashboard /> : <AdminLogin />;
+	// user logged in but not on whitelist — useAuth already signs them out
+	if (user && !isAdmin)
+		return (
+			<div
+				style={{
+					minHeight: '100vh',
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'center',
+					justifyContent: 'center',
+					fontFamily: 'Jost, sans-serif',
+					gap: '12px',
+				}}
+			>
+				<span style={{ fontSize: '2rem' }}>⛔</span>
+				<p style={{ color: '#cc3333', fontWeight: 500 }}>
+					Access denied. Your account is not authorised.
+				</p>
+			</div>
+		);
+	return isAdmin ? <AdminDashboard /> : <AdminLogin />;
 }
 
 function AppContent() {
