@@ -1,14 +1,32 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import type { User } from '@supabase/supabase-js'
+import type { User, Session } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
-const checkWhitelist = async (email: string): Promise<boolean> => {
+// Creates an authenticated client using the user's own JWT
+// This guarantees RLS sees auth.role() = 'authenticated'
+const checkWhitelist = async (email: string, session: Session): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.functions.invoke('check-admin', {
-      body: { email }
-    })
+    const authedClient = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        },
+      }
+    )
+
+    const { data, error } = await authedClient
+      .from('admin_whitelist')
+      .select('email')
+      .eq('email', email.toLowerCase().trim())
+      .maybeSingle()
+
     if (error) return false
-    return data?.isAdmin === true
+    return !!data
   } catch {
     return false
   }
@@ -22,57 +40,38 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true
 
-    // Set up listener FIRST before any async work
-    // so no auth events are missed
+    const resolve = async (session: Session | null) => {
+      if (!session?.user) {
+        if (mounted) { setUser(null); setIsAdmin(false); setLoading(false) }
+        return
+      }
+      const allowed = await checkWhitelist(session.user.email ?? '', session)
+      if (!mounted) return
+      setUser(session.user)
+      setIsAdmin(allowed)
+      setLoading(false)
+    }
+
+    // Listener first — catches SIGNED_IN, TOKEN_REFRESHED, SIGNED_OUT
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return
-
         if (event === 'SIGNED_OUT') {
-          setUser(null)
-          setIsAdmin(false)
-          setLoading(false)
+          setUser(null); setIsAdmin(false); setLoading(false)
           return
         }
-
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          const u = session?.user ?? null
-          if (!u) {
-            setUser(null)
-            setIsAdmin(false)
-            setLoading(false)
-            return
-          }
-          const allowed = await checkWhitelist(u.email ?? '')
-          if (!mounted) return
-          setUser(u)
-          setIsAdmin(allowed)
-          setLoading(false)
+          await resolve(session)
         }
       }
     )
 
-    // Then read the existing session to handle page refresh
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return
-      const u = session?.user ?? null
-      if (!u) {
-        setUser(null)
-        setIsAdmin(false)
-        setLoading(false)
-        return
-      }
-      const allowed = await checkWhitelist(u.email ?? '')
-      if (!mounted) return
-      setUser(u)
-      setIsAdmin(allowed)
-      setLoading(false)
+    // Then read stored session for page refresh
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      resolve(session)
     })
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
+    return () => { mounted = false; subscription.unsubscribe() }
   }, [])
 
   const signOut = async () => {
