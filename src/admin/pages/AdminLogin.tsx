@@ -39,7 +39,13 @@ export default function AdminLogin() {
 				setError('Access denied. This email is not authorised as an admin.');
 			}
 		} else {
-			const { error } = await supabase.auth.signUp({ email, password });
+			const { error } = await supabase.auth.signUp({
+				email,
+				password,
+				options: {
+					emailRedirectTo: `${window.location.origin}/admin`,
+				},
+			});
 			if (error) setError(error.message);
 			else
 				setSuccess(
