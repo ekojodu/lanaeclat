@@ -15,20 +15,32 @@ import './styles/globals.css'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [pathname])
-
   return null
 }
 
 function AdminRoute() {
   const { user, isAdmin, loading } = useAuth()
 
-  if (loading) return <div>Loading...</div>
+  // Show loader until auth is fully resolved
+  if (loading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost, sans-serif', color: '#c8537a' }}>
+      Loading...
+    </div>
+  )
+
+  // Auth resolved — no user means show login
   if (!user) return <AdminLogin />
-  if (!isAdmin) return <div>Access denied</div>
+
+  // Auth resolved — user exists but not on whitelist
+  if (!isAdmin) return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost, sans-serif', gap: '12px' }}>
+      <span style={{ fontSize: '2rem' }}>⛔</span>
+      <p style={{ color: '#cc3333', fontWeight: 500 }}>Access denied. Your account is not authorised.</p>
+    </div>
+  )
 
   return <AdminDashboard />
 }
@@ -66,17 +78,15 @@ function AppContent() {
     <>
       <Cursor />
       {!isAdminPath && <Navbar />}
-
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/"         element={<Home />} />
+        <Route path="/about"    element={<About />} />
         <Route path="/services" element={<Services />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/admin" element={<AdminRoute />} />
-        <Route path="*" element={<Home />} />
+        <Route path="/gallery"  element={<Gallery />} />
+        <Route path="/contact"  element={<Contact />} />
+        <Route path="/admin"    element={<AdminRoute />} />
+        <Route path="*"         element={<Home />} />
       </Routes>
-
       {!isAdminPath && <Footer />}
     </>
   )
