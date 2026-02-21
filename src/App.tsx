@@ -19,32 +19,34 @@ function ScrollToTop() {
 }
 
 function AppContent() {
-  // Setup global scroll reveal
+  const { pathname } = useLocation();
+
+  // Setup global scroll reveal — re-runs on route change only
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
+            // Stop watching once visible — prevents re-triggering on re-renders
+            observer.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.12 }
     );
 
-    const observe = () => {
+    // Small delay to let the page render before observing
+    const timer = setTimeout(() => {
       const els = document.querySelectorAll('.reveal:not(.visible)');
       els.forEach((el) => observer.observe(el));
-    };
+    }, 50);
 
-    observe();
-    // Re-observe after route changes
-    const timer = setInterval(observe, 300);
     return () => {
       observer.disconnect();
-      clearInterval(timer);
+      clearTimeout(timer);
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <>
