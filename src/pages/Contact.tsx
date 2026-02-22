@@ -27,21 +27,41 @@ export default function Contact() {
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
 
+  // Strip HTML tags and dangerous characters from any string
+  const sanitize = (str: string) =>
+    str.replace(/<[^>]*>/g, '').replace(/['"`;\\]/g, '').trim().slice(0, 500);
+
+  // Validate email format
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  // Validate phone — digits, spaces, +, dashes only
+  const isValidPhone = (phone: string) =>
+    !phone || /^[\d\s+\-().]{7,20}$/.test(phone);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Save booking to Supabase (shows in admin dashboard)
-    await supabase.from('bookings').insert({
-      client_name:    form.name,
-      client_email:   form.email,
-      client_phone:   form.phone,
+    // Client-side validation
+    if (!isValidEmail(form.email)) return;
+    if (!isValidPhone(form.phone)) return;
+    if (!form.name.trim() || !form.service || !form.date || !form.time) return;
+
+    // Sanitize all fields before writing to database
+    const clean = {
+      client_name:    sanitize(form.name),
+      client_email:   form.email.toLowerCase().trim().slice(0, 254),
+      client_phone:   sanitize(form.phone).slice(0, 20),
       service_id:     form.service,
-      service_name:   form.service,
+      service_name:   sanitize(form.service).slice(0, 100),
       preferred_date: form.date,
-      preferred_time: form.time,
-      notes:          form.message,
-      status:         'pending',
-    });
+      preferred_time: sanitize(form.time).slice(0, 20),
+      notes:          sanitize(form.message).slice(0, 500),
+      status:         'pending' as const,
+    };
+
+    // Save booking to Supabase (shows in admin dashboard)
+    await supabase.from('bookings').insert(clean);
 
     // Also open mailto as a notification backup
     const body = [
@@ -49,15 +69,15 @@ export default function Contact() {
       '',
       'I would like to book an appointment:',
       '',
-      `Name: ${form.name}`,
-      `Email: ${form.email}`,
-      `Phone: ${form.phone}`,
-      `Service: ${form.service}`,
-      `Preferred Date: ${form.date}`,
-      `Preferred Time: ${form.time}`,
+      `Name: ${clean.client_name}`,
+      `Email: ${clean.client_email}`,
+      `Phone: ${clean.client_phone}`,
+      `Service: ${clean.service_name}`,
+      `Preferred Date: ${clean.preferred_date}`,
+      `Preferred Time: ${clean.preferred_time}`,
       '',
       'Additional Notes:',
-      form.message,
+      clean.notes,
       '',
       'Looking forward to hearing from you!',
     ].join('\n');
