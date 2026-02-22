@@ -1,29 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import './Gallery.css';
 
-// Using emoji + gradient placeholders until real photos are supplied
-const galleryItems = [
+interface GalleryItem {
+  id: string | number
+  url?: string
+  emoji?: string
+  color?: string
+  label: string
+  cat: string
+}
+
+// Fallback placeholders shown until real images are uploaded
+const placeholders: GalleryItem[] = [
   { id: 1, emoji: '🌸', label: 'Deep Cleansing Session', color: 'linear-gradient(135deg, #f5c5d0, #e8849e)', cat: 'treatments' },
   { id: 2, emoji: '💧', label: 'Hydrating Facial', color: 'linear-gradient(135deg, #c8e8f0, #a0c8e0)', cat: 'treatments' },
   { id: 3, emoji: '✨', label: 'Glow Transformation', color: 'linear-gradient(135deg, #f0d080, #e8b040)', cat: 'results' },
   { id: 4, emoji: '🌿', label: 'Acne Treatment', color: 'linear-gradient(135deg, #c8e0c0, #a0c890)', cat: 'treatments' },
   { id: 5, emoji: '🌙', label: 'Dark Spot Correction', color: 'linear-gradient(135deg, #d0c0e8, #b0a0d0)', cat: 'results' },
   { id: 6, emoji: '⏳', label: 'Anti-Aging Session', color: 'linear-gradient(135deg, #f5c5d0, #c8537a)', cat: 'treatments' },
-  { id: 7, emoji: '🕊️', label: 'Sensitive Skin Care', color: 'linear-gradient(135deg, #f0e8e0, #e0d0c0)', cat: 'treatments' },
-  { id: 8, emoji: '💆', label: 'Relaxation Moment', color: 'linear-gradient(135deg, #e8f5e0, #c8e8b0)', cat: 'studio' },
-  { id: 9, emoji: '🌺', label: 'Before & After', color: 'linear-gradient(135deg, #f5d0c8, #e8a090)', cat: 'results' },
-  { id: 10, emoji: '🏡', label: 'Studio Interior', color: 'linear-gradient(135deg, #fdf0f3, #f5c5d0)', cat: 'studio' },
-  { id: 11, emoji: '🧴', label: 'Product Selection', color: 'linear-gradient(135deg, #f0e0d0, #e0c8b0)', cat: 'studio' },
-  { id: 12, emoji: '✦', label: 'Happy Client', color: 'linear-gradient(135deg, #c8537a, #9b2f52)', cat: 'results' },
 ];
 
 const categories = ['all', 'treatments', 'results', 'studio'];
 
 export default function Gallery() {
   const [cat, setCat] = useState('all');
-  const [lightbox, setLightbox] = useState<typeof galleryItems[0] | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(placeholders);
+  const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
   const revealRef = useScrollReveal();
+
+  useEffect(() => {
+    supabase
+      .from('gallery_images')
+      .select('*')
+      .eq('active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setGalleryItems(data.map(d => ({
+            id: d.id,
+            url: d.url,
+            label: d.label,
+            cat: d.category,
+          })))
+        }
+        // If no images uploaded yet, keep showing placeholders
+      })
+  }, [])
 
   const filtered = cat === 'all' ? galleryItems : galleryItems.filter(g => g.cat === cat);
 
@@ -66,8 +90,11 @@ export default function Gallery() {
                 style={{ '--i': i, transitionDelay: `${i * 0.05}s` } as any}
                 onClick={() => setLightbox(item)}
               >
-                <div className="gallery-thumb" style={{ background: item.color }}>
-                  <span className="gallery-emoji">{item.emoji}</span>
+                <div className="gallery-thumb" style={{ background: item.url ? undefined : item.color }}>
+                  {item.url
+                    ? <img src={item.url} alt={item.label} loading="lazy" className="gallery-img" />
+                    : <span className="gallery-emoji">{item.emoji}</span>
+                  }
                   <div className="gallery-overlay">
                     <span className="gallery-label">{item.label}</span>
                     <span className="gallery-view">View ↗</span>
@@ -90,8 +117,11 @@ export default function Gallery() {
       {lightbox && (
         <div className="lightbox" onClick={() => setLightbox(null)}>
           <div className="lightbox-inner" onClick={e => e.stopPropagation()}>
-            <div className="lightbox-thumb" style={{ background: lightbox.color }}>
-              <span>{lightbox.emoji}</span>
+            <div className="lightbox-thumb" style={{ background: lightbox.url ? undefined : lightbox.color }}>
+              {lightbox.url
+                ? <img src={lightbox.url} alt={lightbox.label} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+                : <span>{lightbox.emoji}</span>
+              }
             </div>
             <div className="lightbox-info">
               <h3>{lightbox.label}</h3>
