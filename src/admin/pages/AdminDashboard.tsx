@@ -4,11 +4,12 @@ import AdminBookings from './AdminBookings'
 import AdminClients from './AdminClients'
 import AdminAnalytics from './AdminAnalytics'
 import AdminPricelist from './AdminPricelist'
+import AdminImages from './AdminImages'
 import './AdminDashboard.css'
 
-type Tab = 'bookings' | 'clients' | 'analytics' | 'pricelist'
+type Tab = 'bookings' | 'clients' | 'analytics' | 'pricelist' | 'images'
 
-const VALID_TABS: Tab[] = ['bookings', 'clients', 'analytics', 'pricelist']
+const VALID_TABS: Tab[] = ['bookings', 'clients', 'analytics', 'pricelist', 'images']
 
 const getInitialTab = (): Tab => {
   const hash = window.location.hash.replace('#', '') as Tab
@@ -30,6 +31,7 @@ export default function AdminDashboard() {
     { key: 'clients',   label: 'Clients',    icon: '👤' },
     { key: 'analytics', label: 'Analytics',  icon: '📊' },
     { key: 'pricelist', label: 'Pricelist',  icon: '💰' },
+    { key: 'images',    label: 'Gallery',    icon: '🖼️' },
   ]
 
   return (
@@ -97,6 +99,7 @@ export default function AdminDashboard() {
           {tab === 'clients'   && <AdminClients />}
           {tab === 'analytics' && <AdminAnalytics />}
           {tab === 'pricelist' && <AdminPricelist />}
+          {tab === 'images'    && <AdminImages />}
         </div>
       </div>
     </div>
