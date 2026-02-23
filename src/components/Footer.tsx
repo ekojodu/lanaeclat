@@ -83,7 +83,7 @@ export default function Footer() {
 
       <div className="footer-bottom container">
         <p>© {year} Lana Éclat Beauty Studio. All rights reserved.</p>
-        <p>Made with ♥ in Kabba, Kogi State</p>
+        <p>..glowing skin is a lifestyle.</p>
       </div>
     </footer>
   );
