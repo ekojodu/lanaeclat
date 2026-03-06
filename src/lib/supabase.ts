@@ -39,4 +39,5 @@ export interface Service {
 	emoji: string;
 	highlight: string | null;
 	active: boolean;
+	sort_order: number;
 }
