@@ -1,0 +1,137 @@
+/* ===== ADD FORM ===== */
+.service-add-form {
+  border: 2px solid var(--rose-blush);
+  background: linear-gradient(135deg, #fdf8fa, white);
+}
+
+.service-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warm-grey);
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--rose-blush);
+  border-radius: 10px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  color: var(--charcoal);
+  outline: none;
+  background: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--rose-mid);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ===== EMOJI PICKER ===== */
+.emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.emoji-option {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 2px solid var(--rose-blush);
+  background: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.emoji-option:hover {
+  border-color: var(--rose-mid);
+  background: var(--rose-pearl);
+  transform: scale(1.1);
+}
+
+.emoji-option.selected {
+  border-color: var(--rose-deep);
+  background: var(--rose-pearl);
+  box-shadow: 0 0 0 3px rgba(155, 47, 82, 0.15);
+}
+
+/* ===== SORT ARROWS ===== */
+.sort-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.sort-btn {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--rose-blush);
+  border-radius: 6px;
+  background: white;
+  color: var(--rose-mid);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.sort-btn:hover:not(:disabled) {
+  background: var(--rose-pearl);
+  border-color: var(--rose-mid);
+}
+
+.sort-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* ===== EDIT LABEL ===== */
+.edit-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warm-grey);
+  margin-bottom: 4px;
+}
+
+@media (max-width: 600px) {
+  .service-form-grid { grid-template-columns: 1fr; }
+  .form-group-full { grid-column: 1; }
+}
