@@ -1,0 +1,12 @@
+{
+  "name": "Lana Éclat Beauty Studio",
+  "short_name": "Lana Éclat",
+  "description": "Luxury facial studio in Kabba, Kogi State Nigeria",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf0f3",
+  "theme_color": "#9b2f52",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
