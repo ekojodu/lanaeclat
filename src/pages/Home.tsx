@@ -188,7 +188,7 @@ export default function Home() {
             {treatments.map((t, i) => (
               <div
                 key={t.id}
-                className={`treatment-card reveal`}
+                className="treatment-card"
                 style={{ '--delay': `${i * 0.07}s` } as any}
               >
                 {t.highlight && <span className="treatment-highlight">{t.highlight}</span>}
