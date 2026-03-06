@@ -3,13 +3,13 @@ import { useAuth } from '../hooks/useAuth'
 import AdminBookings from './AdminBookings'
 import AdminClients from './AdminClients'
 import AdminAnalytics from './AdminAnalytics'
-import AdminPricelist from './AdminPricelist'
+import AdminServices from './AdminServices'
 import AdminImages from './AdminImages'
 import './AdminDashboard.css'
 
-type Tab = 'bookings' | 'clients' | 'analytics' | 'pricelist' | 'images'
+type Tab = 'bookings' | 'clients' | 'analytics' | 'services' | 'images'
 
-const VALID_TABS: Tab[] = ['bookings', 'clients', 'analytics', 'pricelist', 'images']
+const VALID_TABS: Tab[] = ['bookings', 'clients', 'analytics', 'services', 'images']
 
 const getInitialTab = (): Tab => {
   const hash = window.location.hash.replace('#', '') as Tab
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     { key: 'bookings',  label: 'Bookings',   icon: '📋' },
     { key: 'clients',   label: 'Clients',    icon: '👤' },
     { key: 'analytics', label: 'Analytics',  icon: '📊' },
-    { key: 'pricelist', label: 'Pricelist',  icon: '💰' },
+    { key: 'services',  label: 'Services',   icon: '💅' },
     { key: 'images',    label: 'Gallery',    icon: '🖼️' },
   ]
 
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
           {tab === 'bookings'  && <AdminBookings />}
           {tab === 'clients'   && <AdminClients />}
           {tab === 'analytics' && <AdminAnalytics />}
-          {tab === 'pricelist' && <AdminPricelist />}
+          {tab === 'services'  && <AdminServices />}
           {tab === 'images'    && <AdminImages />}
         </div>
       </div>
