@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import { bustServicesCache } from '../../lib/servicesCache'
 import type { Service } from '../../lib/supabase'
 import './AdminDashboard.css'
 import './AdminPricelist.css'
@@ -15,7 +16,6 @@ const blankService = (): Partial<Service> => ({
   emoji: '🌸',
   highlight: '',
   active: true,
-  sort_order: 0,
 })
 
 export default function AdminServices() {
@@ -71,6 +71,7 @@ export default function AdminServices() {
     }
 
     const { error } = await supabase.from('services').insert(payload)
+    if (!error) bustServicesCache()
     if (error) {
       setAddError('Failed to add: ' + error.message)
     } else {
@@ -101,6 +102,7 @@ export default function AdminServices() {
     setSaving(id)
     const { error } = await supabase.from('services').update(editData).eq('id', id)
     if (!error) {
+      bustServicesCache()
       setServices(prev => prev.map(s => s.id === id ? { ...s, ...editData } : s))
       setSaved(id)
       setTimeout(() => setSaved(null), 2000)
@@ -115,6 +117,7 @@ export default function AdminServices() {
     if (!confirm(`Delete "${service.name}"? This cannot be undone.`)) return
     setDeleting(service.id)
     await supabase.from('services').delete().eq('id', service.id)
+    bustServicesCache()
     setServices(prev => prev.filter(s => s.id !== service.id))
     setDeleting(null)
   }
