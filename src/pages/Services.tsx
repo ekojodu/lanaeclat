@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { getServices } from '../lib/servicesCache';
 import type { Service } from '../lib/supabase';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import './Services.css';
@@ -18,16 +18,7 @@ export default function Services() {
   const revealRef = useScrollReveal();
 
   useEffect(() => {
-    supabase
-      .from('services')
-      .select('*')
-      .eq('active', true)
-      .order('sort_order', { ascending: true })
-      .order('name', { ascending: true })
-      .then(({ data }) => {
-        if (data) setServices(data);
-        setLoading(false);
-      });
+    getServices().then(data => { setServices(data); setLoading(false); });
   }, []);
 
   return (
