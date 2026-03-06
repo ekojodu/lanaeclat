@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { getServices } from '../lib/servicesCache';
 import type { Service } from '../lib/supabase';
 import { ENV } from '../config/env';
 import { useScrollReveal } from '../hooks/useScrollReveal';
@@ -32,9 +32,7 @@ export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [servicesLoading, setServicesLoading] = useState(true);
   useEffect(() => {
-    supabase.from('services').select('*').eq('active', true)
-      .order('sort_order', { ascending: true }).order('name', { ascending: true })
-      .then(({ data }) => { if (data) setServices(data); setServicesLoading(false); });
+    getServices().then(data => { setServices(data); setServicesLoading(false); });
   }, []);
   const revealRef = useScrollReveal();
   const heroRef = useRef<HTMLDivElement>(null);
@@ -193,15 +191,14 @@ export default function Home() {
           </div>
 
           <div className="treatments-grid">
-            {servicesLoading ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="treatment-card treatment-skeleton" style={{ '--delay': `${i * 0.07}s` } as any}>
-                  <div className="skeleton-line" style={{ width: '60%', height: '2rem', marginBottom: '12px' }} />
-                  <div className="skeleton-line" style={{ width: '100%', height: '1rem', marginBottom: '8px' }} />
-                  <div className="skeleton-line" style={{ width: '80%', height: '1rem' }} />
-                </div>
-              ))
-            ) : services.map((t, i) => (
+            {servicesLoading && [...Array(4)].map((_, i) => (
+              <div key={i} className="treatment-card treatment-skeleton" style={{ '--delay': `${i * 0.07}s` } as any}>
+                <div className="skeleton-line" style={{ width: '60%', height: '2rem', marginBottom: '12px' }} />
+                <div className="skeleton-line" style={{ width: '100%', height: '1rem', marginBottom: '8px' }} />
+                <div className="skeleton-line" style={{ width: '80%', height: '1rem' }} />
+              </div>
+            ))}
+            {!servicesLoading && services.map((t, i) => (
               <div
                 key={t.id}
                 className={`treatment-card reveal`}
@@ -217,7 +214,6 @@ export default function Home() {
                 </div>
               </div>
             ))}
-            
           </div>
 
           <div className="services-cta reveal" style={{ textAlign: 'center', marginTop: '48px' }}>
