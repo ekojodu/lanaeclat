@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { treatments } from '../data/treatments';
+import { supabase } from '../lib/supabase';
+import type { Service } from '../lib/supabase';
 import { ENV } from '../config/env';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import './Home.css';
@@ -28,6 +29,12 @@ function FloatingPetals() {
 }
 
 export default function Home() {
+  const [services, setServices] = useState<Service[]>([]);
+  useEffect(() => {
+    supabase.from('services').select('*').eq('active', true)
+      .order('sort_order', { ascending: true }).order('name', { ascending: true })
+      .then(({ data }) => { if (data) setServices(data); });
+  }, []);
   const revealRef = useScrollReveal();
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -185,7 +192,7 @@ export default function Home() {
           </div>
 
           <div className="treatments-grid">
-            {treatments.map((t, i) => (
+            {services.map((t, i) => (
               <div
                 key={t.id}
                 className={`treatment-card reveal`}
