@@ -240,3 +240,63 @@
   .form-wrapper { padding: 28px 20px; }
   .map-address { flex-direction: column; text-align: center; }
 }
+
+/* ===== MAP EMBED ===== */
+.map-embed-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-rose);
+}
+
+.map-embed-card iframe {
+  border-radius: 20px;
+}
+
+.map-overlay-card {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  flex-wrap: wrap;
+}
+
+.map-overlay-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.map-overlay-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rose-deep);
+}
+
+.map-overlay-info strong {
+  font-size: 0.9rem;
+  color: var(--charcoal);
+}
+
+.map-overlay-hours {
+  font-size: 0.8rem;
+  color: var(--warm-grey);
+}
+
+.map-directions-btn {
+  padding: 10px 20px !important;
+  font-size: 0.85rem !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .map-overlay-card { bottom: 12px; left: 12px; right: 12px; }
+}
