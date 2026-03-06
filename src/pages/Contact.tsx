@@ -300,54 +300,28 @@ export default function Contact() {
             <h2>We're in <em>Kabba, Kogi State</em></h2>
           </div>
           <div className="map-wrapper reveal reveal-delay-1">
-            <div className="map-static-card">
-              {/* Static map using OpenStreetMap tile — works on all devices */}
-              <img
-                src={`https://staticmap.openstreetmap.de/staticmap.php?center=${ENV.mapLat},${ENV.mapLng}&zoom=${ENV.mapZoom}&size=1200x450&markers=${ENV.mapLat},${ENV.mapLng},red`}
-                alt="Map showing Lana Eclat Beauty Studio location in Kabba, Kogi State"
-                className="map-static-img"
-                onError={(e) => {
-                  // Fallback if static map fails — show a styled placeholder
-                  const target = e.currentTarget;
-                  target.style.display = 'none';
-                  const fallback = target.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'flex';
-                }}
+            <div className="map-embed-card">
+              <iframe
+                title="Lana Éclat location"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(ENV.location)}&output=embed`}
+                width="100%"
+                height="420"
+                style={{ border: 0, display: 'block' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
               />
-              {/* Fallback card if image fails */}
-              <div className="map-fallback" style={{ display: 'none' }}>
-                <div className="map-fallback-pin">📍</div>
-                <h3>Lana Éclat Beauty Studio</h3>
-                <p>{ENV.location}</p>
-              </div>
-              {/* Overlay with location info + directions button */}
               <div className="map-overlay-card">
                 <div className="map-overlay-info">
                   <span className="map-overlay-label">📍 Our Location</span>
                   <strong>{ENV.location}</strong>
                   <span className="map-overlay-hours">Mon–Sat: 9am–7pm</span>
                 </div>
-                <a
-                  href={directionsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-primary map-directions-btn"
-                >
+                <a href={directionsUrl} target="_blank" rel="noreferrer" className="btn-primary map-directions-btn">
                   <span>Get Directions →</span>
                 </a>
               </div>
             </div>
-          </div>
-          <div className="map-address reveal reveal-delay-2">
-            <span>📍 {ENV.location}</span>
-            <a
-              href={directionsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="btn-outline"
-            >
-              Open in Google Maps →
-            </a>
           </div>
         </div>
       </section>
