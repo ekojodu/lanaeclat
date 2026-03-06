@@ -76,24 +76,32 @@ function AppContent() {
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible')
-            observer.unobserve(entry.target)
+            io.unobserve(entry.target)
           }
         })
       },
-      { threshold: 0.12 }
+      { threshold: 0.08 }
     )
 
-    const timer = setTimeout(() => {
-      const els = document.querySelectorAll('.reveal:not(.visible)')
-      els.forEach((el) => observer.observe(el))
-    }, 50)
+    const observe = () => {
+      document.querySelectorAll('.reveal:not(.visible)').forEach(el => io.observe(el))
+    }
 
-    return () => { observer.disconnect(); clearTimeout(timer) }
+    // Observe immediately + after short delay for async-rendered content
+    observe()
+    const t1 = setTimeout(observe, 100)
+    const t2 = setTimeout(observe, 500)
+
+    // Also watch for DOM changes (e.g. data loaded from Supabase)
+    const mo = new MutationObserver(observe)
+    mo.observe(document.body, { childList: true, subtree: true })
+
+    return () => { io.disconnect(); mo.disconnect(); clearTimeout(t1); clearTimeout(t2) }
   }, [pathname])
 
   const isAdminPath = pathname === '/admin'
