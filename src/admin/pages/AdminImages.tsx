@@ -16,7 +16,7 @@ interface GalleryImage {
 const CATEGORIES = ['treatments', 'results', 'studio']
 
 // Compress image in browser before upload
-// Resizes to max 1200px and compresses to ~80% quality
+// Resizes to max 800px and compresses to WebP for 30-40% smaller files
 const compressImage = (file: File): Promise<File> => {
   return new Promise((resolve) => {
     const img = new Image()
@@ -46,14 +46,14 @@ const compressImage = (file: File): Promise<File> => {
         (blob) => {
           URL.revokeObjectURL(url)
           if (!blob) { resolve(file); return }
-          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
-            type: 'image/jpeg',
+          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+            type: 'image/webp',
             lastModified: Date.now(),
           })
           resolve(compressed)
         },
-        'image/jpeg',
-        0.82 // 82% quality — good balance of size and sharpness
+        'image/webp',
+        0.85 // 85% quality — WebP is smaller than JPEG at same quality
       )
     }
     img.src = url
@@ -214,7 +214,7 @@ export default function AdminImages() {
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/heic"
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
