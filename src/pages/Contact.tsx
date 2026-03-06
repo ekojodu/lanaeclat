@@ -1,8 +1,9 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { ENV } from '../config/env'
 import { supabase } from '../lib/supabase';
-import { treatments } from '../data/treatments';
+import type { Service } from '../lib/supabase';
 import './Contact.css';
 
 interface FormData {
@@ -19,10 +20,18 @@ const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:
 
 export default function Contact() {
   const revealRef = useScrollReveal();
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormData>({
     name: '', email: '', phone: '', service: '', date: '', time: '', message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    supabase.from('services').select('id, name').eq('active', true)
+      .order('sort_order', { ascending: true }).order('name', { ascending: true })
+      .then(({ data }) => { if (data) setServices(data); });
+  }, []);
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
@@ -87,7 +96,9 @@ export default function Contact() {
     const mailtoLink = `mailto:${ENV.reservationEmail}?subject=${subject}&body=${encodedBody}`;
 
     window.location.href = mailtoLink;
-    setSubmitted(true);
+    navigate('/booking-confirmation', {
+      state: { name: clean.client_name, service: clean.service_name, date: form.date, time: form.time }
+    });
   };
 
   // Google Maps embed — no API key required for this embed format
@@ -177,7 +188,7 @@ export default function Contact() {
                     <label htmlFor="service">Treatment *</label>
                     <select id="service" required value={form.service} onChange={set('service')}>
                       <option value="">Select a treatment</option>
-                      {treatments.map(t => (
+                      {services.map(t => (
                         <option key={t.id} value={t.name}>{t.name}</option>
                       ))}
                     </select>
