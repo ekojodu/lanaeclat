@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { ENV } from '../config/env'
 import { supabase } from '../lib/supabase';
-import type { Service } from '../lib/supabase';
+
 import './Contact.css';
 
 interface FormData {
@@ -25,7 +25,7 @@ export default function Contact() {
     name: '', email: '', phone: '', service: '', date: '', time: '', message: '',
   });
   const [submitted, setSubmitted] = useState(false);
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     supabase.from('services').select('id, name').eq('active', true)
