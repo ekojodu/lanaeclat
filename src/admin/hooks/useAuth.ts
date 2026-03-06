@@ -1,16 +1,48 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
-// Read admin status directly from JWT — no network request needed
-const isAdminUser = (user: User): boolean => {
-  return user.app_metadata?.role === 'admin'
-}
+const TIMEOUT_MS = 2 * 60 * 60 * 1000 // 2 hours
+const EVENTS = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll']
+
+const isAdminUser = (user: User): boolean =>
+  user.app_metadata?.role === 'admin'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setIsAdmin(false)
+  }, [])
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      signOut()
+    }, TIMEOUT_MS)
+  }, [signOut])
+
+  // Attach/detach activity listeners when admin is logged in
+  useEffect(() => {
+    if (!user || !isAdmin) {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      EVENTS.forEach(e => window.removeEventListener(e, resetTimer))
+      return
+    }
+
+    resetTimer()
+    EVENTS.forEach(e => window.addEventListener(e, resetTimer, { passive: true }))
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      EVENTS.forEach(e => window.removeEventListener(e, resetTimer))
+    }
+  }, [user, isAdmin, resetTimer])
 
   useEffect(() => {
     let mounted = true
@@ -22,14 +54,12 @@ export function useAuth() {
       setLoading(false)
     }
 
-    // Listener first — no async, instant
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (mounted) resolve(session?.user ?? null)
       }
     )
 
-    // Then read stored session for page refresh
     supabase.auth.getSession().then(({ data: { session } }) => {
       resolve(session?.user ?? null)
     })
@@ -39,12 +69,6 @@ export function useAuth() {
       subscription.unsubscribe()
     }
   }, [])
-
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setIsAdmin(false)
-  }
 
   return { user, isAdmin, loading, signOut }
 }
