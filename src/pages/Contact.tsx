@@ -26,14 +26,17 @@ export default function Contact() {
     name: '', email: '', phone: '', service: '', date: '', time: '', message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
   const [services, setServices] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     getServices().then(data => setServices(data));
   }, []);
 
-  const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+  const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setError('');
     setForm(f => ({ ...f, [key]: e.target.value }));
+  };
 
   // Strip HTML tags and dangerous characters from any string
   const sanitize = (str: string) =>
@@ -67,6 +70,19 @@ export default function Contact() {
       notes:          sanitize(form.message).slice(0, 500),
       status:         'pending' as const,
     };
+
+    // Rate limit — check how many bookings this email has made in last 24 hours
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('client_email', clean.client_email)
+      .gte('created_at', since);
+
+    if ((count ?? 0) >= 3) {
+      setError('You have already made 3 booking requests today. Please contact us directly on WhatsApp.');
+      return;
+    }
 
     // Save booking to Supabase (shows in admin dashboard)
     await supabase.from('bookings').insert(clean);
@@ -228,6 +244,11 @@ export default function Contact() {
                   />
                 </div>
 
+                {error && (
+                  <div style={{ background: '#fff0f0', border: '1px solid #ffcccc', borderRadius: '10px', padding: '12px 16px', color: '#cc3333', fontSize: '0.88rem', marginBottom: '12px' }}>
+                    ⚠ {error}
+                  </div>
+                )}
                 <button type="submit" className="btn-primary submit-btn">
                   <span>✦ Send Reservation Request</span>
                 </button>
