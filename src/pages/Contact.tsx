@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { ENV } from '../config/env'
 import { supabase } from '../lib/supabase';
+import { getServices } from '../lib/servicesCache';
 
 import './Contact.css';
 
@@ -28,9 +29,7 @@ export default function Contact() {
   const [services, setServices] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    supabase.from('services').select('id, name').eq('active', true)
-      .order('sort_order', { ascending: true }).order('name', { ascending: true })
-      .then(({ data }) => { if (data) setServices(data); });
+    getServices().then(data => setServices(data));
   }, []);
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
