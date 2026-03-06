@@ -82,10 +82,90 @@
     }
     </script>
 
+
+    <!-- FAQ Schema for Google rich results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How long does a facial treatment take at Lana Éclat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our facial treatments range from 45 to 60 minutes depending on the service. Hydrating and Sensitive facials take 45 minutes, Brightening and Acne Control take 50 minutes, and Acne with Blackhead Removal and Anti-Ageing facials take 60 minutes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is Lana Éclat Beauty Studio located?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Lana Éclat Beauty Studio is located in Kabba, Kogi State, Nigeria. You can book an appointment online or contact us on WhatsApp at +2348104461674."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What facial treatments does Lana Éclat offer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer seven facial treatments: Hydrating Facial, Sensitive/Calming Facial, Exfoliating Facial, Acne Control Facial, Acne Facial with Blackhead Removal, Brightening Facial, and Anti-Ageing Facial. Each is tailored to specific skin types and concerns."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I book an appointment at Lana Éclat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can book an appointment through our website at the Contact page, or message us directly on WhatsApp at +2348104461674. We respond within 24 hours to confirm your slot."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there a special offer for first-time clients?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! First-time clients at Lana Éclat receive a special discount on their first facial treatment. Book early as slots are limited."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are Lana Éclat's opening hours?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We are open Monday to Friday from 9:00 AM to 7:00 PM, and Saturday from 9:00 AM to 6:00 PM. Sunday appointments are available by request only."
+          }
+        }
+      ]
+    }
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Critical font style to prevent flash of unstyled text -->
+    <style>
+      @font-face {
+        font-family: 'Cormorant Garamond';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: local('Cormorant Garamond'), local('CormorantGaramond-Regular');
+      }
+      @font-face {
+        font-family: 'Jost';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: local('Jost'), local('Jost-Regular');
+      }
+      /* Prevent layout shift while fonts load */
+      body { font-family: 'Jost', system-ui, sans-serif; }
+      h1, h2, h3, em { font-family: 'Cormorant Garamond', Georgia, serif; }
+    </style>
 
     <!-- Fonts: preconnect + non-blocking load -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
