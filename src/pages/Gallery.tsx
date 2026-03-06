@@ -103,13 +103,6 @@ export default function Gallery() {
               </div>
             ))}
           </div>
-
-          {/* Note */}
-          <div className="gallery-note reveal" style={{ textAlign: 'center', marginTop: '48px' }}>
-            <p style={{ color: 'var(--warm-grey)', fontStyle: 'italic' }}>
-              📸 Add your real client photos to the gallery by updating the gallery data file.
-            </p>
-          </div>
         </div>
       </section>
 
